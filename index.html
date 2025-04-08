@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>🏀 NBA Shooting Game</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+      color: #222;
+    }
+
+    #game-container {
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    .controls {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    input {
+      padding: 8px;
+      margin: 5px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 10px 5px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .players {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      background: white;
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .card h2 {
+      margin: 0;
+      font-size: 1.3em;
+    }
+
+    .card p {
+      margin: 5px 0;
+    }
+
+    .results {
+      text-align: center;
+      font-size: 1.1em;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .champion {
+      font-size: 1.3em;
+      font-weight: bold;
+      margin-top: 15px;
+      color: #28a745;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <h1>🏀 NBA Shooting Competition</h1>
+
+    <div class="controls">
+      <input type="text" id="newName" placeholder="Player Name" />
+      <input type="text" id="newTeam" placeholder="Team Name" />
+      <button onclick="addPlayer()">➕ Add Player</button>
+      <button onclick="startGame()">🔥 Start Game</button>
+    </div>
+
+    <div class="players" id="players"></div>
+    <div class="results" id="results"></div>
+  </div>
+
+  <script>
+    class Player {
+      constructor(name, team) {
+        this.name = name;
+        this.team = team;
+        this.score = 0;
+      }
+
+      shoot(attempts = 5) {
+        this.score = Array.from({ length: attempts }, () => Math.random() > 0.5).filter(Boolean).length;
+      }
+    }
+
+    const athletes = [
+      new Player("Steph Curry", "Warriors"),
+      new Player("LeBron James", "Lakers"),
+      new Player("Kevin Durant", "Suns"),
+      new Player("Jayson Tatum", "Celtics"),
+      new Player("Giannis Antetokounmpo", "Bucks"),
+      new Player("Ja Morant", "Grizzlies"),
+      new Player("Luka Doncic", "Mavericks")
+    ];
+
+    const playersDiv = document.getElementById("players");
+    const resultsDiv = document.getElementById("results");
+
+    function renderPlayers(players) {
+      playersDiv.innerHTML = players
+        .map(
+          p => `
+          <div class="card">
+            <h2>${p.name}</h2>
+            <p>🏀 Team: ${p.team}</p>
+            <p>🎯 Score: <strong>${p.score}</strong></p>
+          </div>`
+        )
+        .join("");
+    }
+
+    function RankingsOfAthletes(players) {
+      players.sort((a, b) => b.score - a.score);
+      let output = "<strong>🏆 Rankings:</strong><br><br>";
+      players.forEach((p, i) => {
+        output += `${i + 1}. <strong>${p.name}</strong> - ${p.score} points<br>`;
+      });
+      return output;
+    }
+
+    function Champion(players) {
+      let result = "";
+      let highestScore = players[0].score;
+      let finalists = players.filter(p => p.score === highestScore);
+
+      while (finalists.length > 1) {
+        result += `<br>🔥 Tiebreaker for: ${finalists.map(p => p.name).join(", ")}<br>`;
+        finalists.forEach(p => p.shoot());
+
+        highestScore = Math.max(...finalists.map(p => p.score));
+        finalists = finalists.filter(p => p.score === highestScore);
+      }
+
+      result += `<div class="champion">🏆 The Champion is ${finalists[0].name} with ${finalists[0].score} points!</div>`;
+      return result;
+    }
+
+    function startGame() {
+      athletes.forEach(player => player.shoot());
+      renderPlayers(athletes);
+
+      let rankings = RankingsOfAthletes(athletes);
+      let champ = Champion(athletes);
+
+      resultsDiv.innerHTML = rankings + champ;
+    }
+
+    function addPlayer() {
+      const name = document.getElementById("newName").value.trim();
+      const team = document.getElementById("newTeam").value.trim();
+
+      if (!name || !team) {
+        alert("Please enter both name and team.");
+        return;
+      }
+
+      const newPlayer = new Player(name, team);
+      athletes.push(newPlayer);
+
+      renderPlayers(athletes);
+      document.getElementById("newName").value = "";
+      document.getElementById("newTeam").value = "";
+    }
+
+    // Initial Render
+    renderPlayers(athletes);
+  </script>
+</body>
+</html>
